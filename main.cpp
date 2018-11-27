@@ -10,5 +10,5 @@ int main(int argc, char** argv) {
   Simulation sim;
   sim.run();
 
-  cout << "End of program" << endl;
+  return 0;
 }

@@ -2,7 +2,7 @@
 #define _FACULTY_RECORD_H_
 
 #include <string>
-// #include "doubleLinkedList.h"
+#include <sstream>
 #include "BST.h"
 
 class Faculty {
@@ -29,8 +29,21 @@ public:
   }
   // Getters and setters
   void addStudent(int sID) { students_.insert(sID); }
+  void deleteStudent(int sID) { students_.deleteNode(sID); }
   std::string name() const { return name_; }
   BST<int> students() const { return students_; }
+  std::string infoLine(std::string delim) const {
+    std::ostringstream ssout;
+    ssout << ID_         << delim;
+    ssout << name_       << delim;
+    ssout << level_      << delim;
+    ssout << department_ << delim;
+    students_.printTree(ssout, delim);
+    // Removes superfluous delimiter
+    std::string ret = ssout.str();
+    ret = ret.substr(0, ret.length() - delim.length());
+    return ret.append("\n");
+  }
 private:
   // Fields
   int ID_;

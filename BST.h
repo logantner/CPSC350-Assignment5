@@ -18,12 +18,16 @@ public:
   bool deleteNode(const T&);
   bool contains(const T&) const;
   T get(const T&) const;
-  TreeNode<T>* getNode(const T&);
+  T& get(const T&);
   bool isEmpty() const { return (root_ == nullptr); }
+  // Getters, setters and display methods
   void printTree(std::ostream& out = std::cout, std::string delim = "\n") const {
     recPrint(root_, out, delim); } // in-order traversal
   void sexyDisplay() const { recDisplay(root_, 0); }; // sooo sexy
   TreeNode<T>* root() const { return root_; }
+
+  bool operator == (const BST<T>& other) const { return root_ == other.root_; }
+  friend std::ostream& operator << (std::ostream& os, const BST<T>& tree) { return os; }
 private:
   TreeNode<T>* root_;
   // deleteNode helpers
@@ -42,7 +46,7 @@ template <class T>
 void BST<T>::insert(T value) {
   // check duplicates
   if (contains(value)) {
-    throw "Cannot insert existing value into tree";
+    throw std::runtime_error("Cannot insert existing value into tree");
   }
 
   TreeNode<T>* newNode = new TreeNode<T>(value);
@@ -102,7 +106,7 @@ T BST<T>::get(const T& k) const {
 }
 
 template <class T>
-TreeNode<T>* BST<T>::getNode(const T& k) {
+T& BST<T>::get(const T& k) {
   if (!contains(k)) {
     throw std::runtime_error("Requesting nonexistent key");
   }
@@ -117,7 +121,7 @@ TreeNode<T>* BST<T>::getNode(const T& k) {
     }
   }
 
-  return current;
+  return current->key();
 }
 
 ////////////////////////////

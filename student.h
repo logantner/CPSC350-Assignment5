@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
 class Student {
 public:
@@ -32,6 +33,17 @@ public:
   // Getters and setters
   std::string name() const { return name_; }
   int advisor() const { return advisor_; }
+  int& advisor() { return advisor_; }
+  std::string infoLine(std::string delim) const {
+    std::ostringstream ssout;
+    ssout << ID_      << delim;
+    ssout << name_    << delim;
+    ssout << level_   << delim;
+    ssout << major_   << delim;
+    ssout << GPA_     << delim;
+    ssout << advisor_ << "\n";
+    return ssout.str();
+  }
 private:
   // Fields
   int ID_;
@@ -50,5 +62,16 @@ private:
     advisor_ = other.advisor_;
   }
 };
+
+// std::string Student::infoLine(std::string delim) const {
+//   std::ostringstream ssout;
+//   ssout << ID_      << delim;
+//   ssout << name_    << delim;
+//   ssout << level_   << delim;
+//   ssout << major_   << delim;
+//   ssout << GPA_     << delim;
+//   ssout << advisor_ << "\n";
+//   return ssout.str();
+// }
 
 #endif

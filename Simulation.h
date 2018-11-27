@@ -5,7 +5,8 @@
 #include "student.h"
 #include "facultyRecord.h"
 #include "BST.h"
-#include "TreeNode.h"
+#include "treeNode.h"
+#include "doubleLinkedList.h"
 
 class Simulation {
 public:
@@ -14,13 +15,19 @@ public:
 
   void run();
 private:
+  // Fields
   BST<Student> masterStudent_;
   BST<Faculty> masterFaculty_;
-  // File reading methods
+  DoubleLinkedList<BST<Student> > masterStudentHistory_;
+  DoubleLinkedList<BST<Faculty> > masterFacultyHistory_;
+  // File reading/writing methods
   void readTables();
   bool fileExists(std::string) const;
   void readStudentTable();
   void readFacultyTable();
+  void writeTables();
+  void recWriteStudent(TreeNode<Student>*, std::ofstream&, std::string);
+  void recWriteFaculty(TreeNode<Faculty>*, std::ofstream&, std::string);
   // Query methods
   void queryUser();
   void displayMenu() const;
@@ -34,11 +41,13 @@ private:
   void executeCase6() const;
   void printFacultyStudents(TreeNode<int>*) const;
   void executeCase7();
-  // void executeCase8();
-  // void executeCase9();
-  // void executeCase11();
-  // void executeCase12();
-  // void executeCase13();
+  void executeCase8();
+  void executeCase9();
+  void executeCase10();
+  void executeCase11();
+  void executeCase12() const;
+  void executeCase13();
+  void saveState();
 };
 
 #endif

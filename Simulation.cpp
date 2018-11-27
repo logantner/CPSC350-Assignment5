@@ -20,13 +20,13 @@ void Simulation::readTables() {
   if (fileExists("studentTable")) {
     readStudentTable();
   }
-  // masterStudent_.sexyDisplay();
 
   if (fileExists("facultyTable")) {
     readFacultyTable();
   }
-  // masterFaculty_.sexyDisplay();
 }
+
+
 
 bool Simulation::fileExists(string fileName) const {
   bool exists = false;
@@ -69,6 +69,35 @@ void Simulation::readFacultyTable() {
   }
 }
 
+void Simulation::writeTables() {
+  string delim = " ";
+  // writeStudentTable(delim);
+  // writeFacultyTable(delim);
+  std::ofstream fout ("studentTable");
+  recWriteStudent(masterStudent_.root(), fout, delim);
+  fout.close();
+
+  fout = std::ofstream("facultyTable");
+  recWriteFaculty(masterFaculty_.root(), fout, delim);
+  fout.close();
+}
+
+void Simulation::recWriteStudent(TreeNode<Student>* node, std::ofstream& fout, string delim) {
+  if (node == nullptr) {return;}
+
+  fout << (node->key()).infoLine(delim);
+  recWriteStudent(node->left(),  fout, delim);
+  recWriteStudent(node->right(), fout, delim);
+}
+
+void Simulation::recWriteFaculty(TreeNode<Faculty>* node, std::ofstream& fout, string delim) {
+  if (node == nullptr) {return;}
+
+  fout << (node->key()).infoLine(delim);
+  recWriteFaculty(node->left(),  fout, delim);
+  recWriteFaculty(node->right(), fout, delim);
+}
+
 void Simulation::queryUser() {
   int queryResult;
   displayMenu();
@@ -82,22 +111,22 @@ void Simulation::queryUser() {
 
 void Simulation::displayMenu() const {
   cout << endl;
-  cout << "=================================================================================" << endl;
-  cout << "  1. Print all students and their information\n";
-  cout << "  2. Print all faculty and their information\n";
-  cout << "  3. Find and display a student's information\n";
-  cout << "  4. Find and display a faculty member's information\n";
-  cout << "  5. Print the name and info of a student's faculty advisor\n";
-  cout << "  6. Given a faculty id, print ALL the names and info of his/her advisees\n";
-  cout << "  7. Add a new student\n";
-  // cout << "  8. Delete a student given the id\n";
-  // cout << "  9. Add a new faculty member\n";
-  // cout << "  10. Delete a faculty member given the id\n";
-  // cout << "  11. Change a student’s advisor given the student id and the new faculty id\n";
-  // cout << "  12. Remove an advisee from a faculty member given the ids\n";
-  // cout << "  13. Rollback\n";
-  cout << "  14. Exit" << endl;
-  cout << "=================================================================================" << endl;
+  cout << "=========================================================\n";
+  cout << "|  1.  Print all students and their information         |\n";
+  cout << "|  2.  Print all faculty and their information          |\n";
+  cout << "|  3.  Find and display a student's information         |\n";
+  cout << "|  4.  Find and display a faculty member's information  |\n";
+  cout << "|  5.  Print the info of a student's faculty advisor    |\n";
+  cout << "|  6.  Print the info of a faculty member's advisees    |\n";
+  cout << "|  7.  Add a new student                                |\n";
+  cout << "|  8.  Delete a student                                 |\n";
+  cout << "|  9.  Add a new faculty member                         |\n";
+  cout << "|  10. Delete a faculty member                          |\n";
+  cout << "|  11. Change a student’s advisor                       |\n";
+  cout << "|  12. Remove an advisee from a faculty member          |\n";
+  cout << "|  13. Rollback                                         |\n";
+  cout << "|  14. Exit                                             |\n";
+  cout << "=========================================================" << endl;
 }
 
 void Simulation::executeRequest(int request) {
@@ -110,13 +139,13 @@ void Simulation::executeRequest(int request) {
     case 5: executeCase5(); break;
     case 6: executeCase6(); break;
     case 7: executeCase7(); break;
-    // case 8: executeCase8(); break;
-    // case 9: executeCase9(); break;
-    // case 10: executeCase10(); break;
-    // case 11: executeCase11(); break;
-    // case 12: executeCase12(); break;
-    // case 13: executeCase13(); break;
-    case 14: break;
+    case 8: executeCase8(); break;
+    case 9: executeCase9(); break;
+    case 10: executeCase10(); break;
+    case 11: executeCase11(); break;
+    case 12: executeCase12(); break;
+    case 13: executeCase13(); break;
+    case 14: writeTables();   break;
     default: cout << "Please provide a valid number (1-14)" << endl;
   }
 }
@@ -216,12 +245,115 @@ void Simulation::executeCase7() {
     cout << "The specified advisor could not be found. The student was not added." << endl;
   }
   else {
+    saveState();
     Student newStudent(id, name, level, major, gpa, advisorID);
     masterStudent_.insert(newStudent);
-    (masterFaculty_.getNode(Faculty(advisorID))->key()).addStudent(id);
-    // masterFaculty_.getNode(Faculty(advisorID)).addStudent(id);
-    cout << "The student was added successfully" << endl;
-    masterStudent_.sexyDisplay();
-    masterFaculty_.sexyDisplay();
+    masterFaculty_.get(Faculty(advisorID)).addStudent(id);
+    cout << "The student has been successfully added to the database." << endl;
+  }
+}
+
+void Simulation::executeCase8() {
+  cout << "You have selected case 8. Please provide the student ID: ";
+  int sID; cin >> sID;
+
+  if (!masterStudent_.contains(Student(sID))) {
+    cout << "The student you are trying to delete does not exist." << endl;
+    return;
+  }
+
+  saveState();
+
+  Student studentToDelete = masterStudent_.get(Student(sID));
+  int fID = studentToDelete.advisor();
+  masterFaculty_.get(Faculty(fID)).deleteStudent(sID);
+  masterStudent_.deleteNode(studentToDelete);
+  cout << "The student has been successfully removed from the database." << endl;
+}
+
+void Simulation::executeCase9() {
+  int fID;
+  string name, level, dept;
+  cout << "You have selected case 9. Please provide the faculty ID: ";
+  cin >> fID;
+  cout << "What is the advisor's name? ";
+  cin >> name;
+  cout << "What is the advisor's level? ";
+  cin >> level;
+  cout << "What is the advisor's department? ";
+  cin >> dept;
+
+  saveState();
+
+  masterFaculty_.insert( Faculty(fID, name, level, dept) );
+  cout << "The faculty member has been successfully added to the database." << endl;
+}
+
+void Simulation::executeCase10() {
+  cout << "You have selected case 10. Please provide a faculty ID to delete: ";
+  int fID; cin >> fID;
+  if ( !masterFaculty_.contains(Faculty(fID)) ) {
+    cout << "The faculty member you are attempting to delete does not exist." << endl;
+    return;
+  }
+
+  Faculty f = masterFaculty_.get(Faculty(fID));
+  if ( !f.students().isEmpty() ) {
+    cout << "Sorry, you can only delete an advisor after their students have been reassigned." << endl;
+  }
+  else {
+    saveState();
+    masterFaculty_.deleteNode(f);
+    cout << "The faculty member has been successfully deleted." << endl;
+  }
+
+}
+
+void Simulation::executeCase11() {
+  cout << "You have selected case 11. Please provide a student ID: ";
+  int sID; cin >> sID;
+  if ( !masterStudent_.contains(Student(sID)) ) {
+    cout << "The student you entered could not be found." << endl;
+    return;
+  }
+
+  cout << "And please provide the ID of their new faculty advisor: ";
+  int newfID; cin >> newfID;
+  if ( !masterFaculty_.contains(Faculty(newfID)) ) {
+    cout << "The advisor you entered could not be found." << endl;
+    return;
+  }
+
+  saveState();
+
+  int oldfID = masterStudent_.get(Student(sID)).advisor();
+  masterStudent_.get(Student(sID)).advisor() = newfID;
+  masterFaculty_.get(Faculty(oldfID)).deleteStudent(sID);
+  masterFaculty_.get(Faculty(newfID)).addStudent(sID);
+  cout << "The student's advisor has been modified successfully." << endl;
+}
+
+void Simulation::executeCase12() const {
+  cout << "I chose not to implement this query/request. I consider this case to\n"
+       << "be either ill-posed, or at best redundant with cases 8 and 11." << endl;
+}
+
+void Simulation::executeCase13() {
+  if (masterStudentHistory_.getSize() == 0) {
+    cout << "Sorry, there are no remaining states to roll back." << endl;
+  }
+  else {
+    masterStudent_ = masterStudentHistory_.removeFront();
+    masterFaculty_ = masterFacultyHistory_.removeFront();
+    cout << "Previous save state has been loaded." << endl;
+  }
+}
+
+void Simulation::saveState() {
+  masterStudentHistory_.insertFront(masterStudent_);
+  masterFacultyHistory_.insertFront(masterFaculty_);
+  if (masterStudentHistory_.getSize() == 6) {
+    masterStudentHistory_.removeBack();
+    masterFacultyHistory_.removeBack();
   }
 }

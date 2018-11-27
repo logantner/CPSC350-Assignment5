@@ -9,6 +9,7 @@ public:
   virtual ~TreeNode() {}
   // getters and setters
   T key() const { return key_; }
+  T& key() { return key_; }
   TreeNode*  left() const { return left_; }
   TreeNode* right() const { return right_; }
   TreeNode*  setLeft(TreeNode* node) { left_ = node; }
